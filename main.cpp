@@ -43,21 +43,34 @@ const char* get_color_before(unsigned n)
     return labels[n];
 }
 
-char get_marker(char c) {
+const char* get_marker(char c) {
     if (c == ' ')
-        return ' ';
+        return " ";
 
-    return c/7 > 0 ? 'X' : 'O';
+    return c/7 > 0 ? "X" : "O";
 }
 
 void print_bitmap(const Bitmap& bitmap) {
+    char line_buff[128];
+
+    printf("--------------------------------\n");
     for (int y = 0; y < bitmap.getHeight(); y++) {
+
+        strcpy(line_buff, "|");
         for (int x = 0; x < bitmap.getWidth(); x++){
             const char c = bitmap.getC(x,y);
-            printf("%s%c" COLOR_AFTER, get_color_before(c%7), get_marker(c));
+            strcat(line_buff, get_color_before(c%7));
+            strcat(line_buff, get_marker(c));
+            strcat(line_buff, get_marker(c));
+            strcat(line_buff, get_marker(c));
+            strcat(line_buff, COLOR_AFTER);
         }
-        printf("\n");
+        strcat(line_buff, "|");
+
+        printf("%s\n", line_buff);
+        printf("%s\n", line_buff);
     }
+    printf("--------------------------------\n");
 }
 
 int main() {
