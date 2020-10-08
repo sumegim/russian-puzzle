@@ -19,10 +19,45 @@ const std::vector<Shape> shapes{
     (Bitmap) {3, 2, 'L', (const char[]) {1, 1, 1, 1, 1, 0}},
 };
 
+
+#define COLOR_AFTER "\033[0m"
+
+const char* get_color_before(unsigned n)
+{
+    n = n % 14;
+    static const char* labels[14] = {
+        "\x1B[31m",
+        "\x1B[32m",
+        "\x1B[33m",
+        "\x1B[34m",
+        "\x1B[35m",
+        "\x1B[36m",
+        "\x1B[37m",
+        "\x1B[91m",
+        "\x1B[92m",
+        "\x1B[93m",
+        "\x1B[94m",
+        "\x1B[35m",
+        "\x1B[96m",
+        "\x1B[97m"
+    };
+
+    return labels[n];
+}
+
+char get_marker(char c) {
+    if (c == ' ')
+        return ' ';
+
+    return c/7 > 0 ? 'X' : 'O';
+}
+
 void print_bitmap(const Bitmap& bitmap) {
     for (int y = 0; y < bitmap.getHeight(); y++) {
-        for (int x = 0; x < bitmap.getWidth(); x++)
-            printf("%c", bitmap.getC(x,y));
+        for (int x = 0; x < bitmap.getWidth(); x++){
+            const char c = bitmap.getC(x,y);
+            printf("%s%c" COLOR_AFTER, get_color_before(c%7), get_marker(c));
+        }
         printf("\n");
     }
 }
