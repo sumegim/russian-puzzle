@@ -88,4 +88,11 @@ public:
 
         return r;
     }
+
+    bool operator==(const Bitmap& other) {
+        if (width != other.width || height != other.height)
+            return false;
+
+        return (memcmp(buffer, other.buffer, width*height) == 0);
+    }
 };
