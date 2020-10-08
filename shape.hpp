@@ -11,6 +11,12 @@ public:
         for (size_t i = 0; i < 4; i++) {
             if(!isContained(bitmap))
                 variants.push_back(bitmap);
+            if(!isContained(bitmap.flipX()))
+                variants.push_back(bitmap.flipX());
+            if(!isContained(bitmap.flipY()))
+                variants.push_back(bitmap.flipY());
+            if(!isContained(bitmap.flipY().flipX()))
+                variants.push_back(bitmap.flipY().flipX());
             bitmap = bitmap.rotate();
         }
     }

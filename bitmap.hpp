@@ -4,7 +4,7 @@
 
 class Bitmap {
 protected:
-    static const int MAX_WIDTH = 25;
+    static const int MAX_WIDTH = 50;
     static const int MAX_HEIGHT = 20;
 
     int width;
@@ -85,6 +85,26 @@ public:
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
                 r.set(y, x, get((width-1)-x, y));
+
+        return r;
+    }
+
+    Bitmap flipX() const {
+        Bitmap r(width, height, color);
+
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                r.set(x, y, get((width-1)-x, y));
+
+        return r;
+    }
+
+    Bitmap flipY() const {
+        Bitmap r(width, height, color);
+
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                r.set(x, y, get(x, (height-1)-y));
 
         return r;
     }

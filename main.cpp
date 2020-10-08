@@ -2,7 +2,7 @@
 
 #include "shape.hpp"
 
-Bitmap canvas(25,5);
+Bitmap canvas(50,5);
 
 const std::vector<Shape> shapes{
     (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
