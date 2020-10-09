@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <time.h>
 
-#include "shapeset.hpp"
+#include "solver.hpp"
 
 const std::vector<Shape> shapes{
     (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
@@ -47,7 +48,7 @@ const char* get_marker(char c) {
     if (c == ' ')
         return " ";
 
-    return c/7 > 0 ? "X" : "O";
+    return (c-'A')/7 > 0 ? "X" : "*";
 }
 
 void print_bitmap(const Bitmap& bitmap) {
@@ -73,27 +74,38 @@ void print_bitmap(const Bitmap& bitmap) {
     printf("--------------------------------\n");
 }
 
+class MyNotifier : public ProgressNotifier {
+    ShapeMap myCanvas;
+    time_t last_timestamp;
+
+public:
+    MyNotifier()
+        : myCanvas(10,6)
+        , last_timestamp(0)
+    {}
+
+    virtual void handlePlacedShape(const ShapeSet& solution, solving_info_t info) override{
+        time_t now = time(NULL);
+
+        if (now > last_timestamp) {
+            printf("%4.1f M, %lu\n", (float)info.attempts/1000000, info.solutions);
+            //solution.draw(myCanvas);
+            //print_bitmap(myCanvas);
+            last_timestamp = now;
+        }
+    }
+
+    virtual void handleSolution(const ShapeSet& solution, solving_info_t info) override{
+        solution.draw(myCanvas);
+        print_bitmap(myCanvas);
+    }
+};
+
+
 int main() {
-    Bitmap canvas(10,6);
-    descriptors_t descriptors;
+    ShapeMap canvas(10,6);
+    MyNotifier notifier;
+    Solver solver(shapes, canvas, notifier);
 
-    descriptors.push_back( {.var = 0, .x = 0, .y = 0});
-    descriptors.push_back( {.var = 4, .x = 0, .y = 1});
-    descriptors.push_back( {.var = 2, .x = 0, .y = 4});
-    descriptors.push_back( {.var = 0, .x = 3, .y = 4});
-    descriptors.push_back( {.var = 0, .x = 1, .y = 2});
-
-    ShapeSet shape_set(shapes, descriptors);
-
-    shape_set.draw(canvas);
-    print_bitmap(canvas);
-    printf("Valid: %d\n", shape_set.isValid());
-
-    // -------------------------------------------
-    descriptors[4].x++;
-    ShapeSet shape_set2(shapes, descriptors);
-
-    shape_set2.draw(canvas);
-    print_bitmap(canvas);
-    printf("Valid: %d\n", shape_set2.isValid());
+    solver.solve();
 }
