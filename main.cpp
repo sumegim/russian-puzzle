@@ -1,8 +1,6 @@
 #include <stdio.h>
 
-#include "shape.hpp"
-
-Bitmap canvas(50,5);
+#include "shapeset.hpp"
 
 const std::vector<Shape> shapes{
     (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
@@ -63,15 +61,17 @@ void print_bitmap(const Bitmap& bitmap) {
 }
 
 int main() {
-    for (size_t i = 0; i < shapes.size(); i++) {
-        for (size_t j = 0; j < shapes[i].getNumOfVariants(); j++)
-        {
-            Bitmap b = shapes[i].getVariant(j);
-            canvas.drawColor(b, j*6, 0);
-            b = b.rotate();
-        }
-        print_bitmap(canvas);
-        canvas.clear();
-        printf("---\n");
-    }
+    Bitmap canvas(10,6);
+    descriptors_t descriptors;
+
+    descriptors.push_back( {.var = 0, .x = 0, .y = 0});
+    descriptors.push_back( {.var = 4, .x = 0, .y = 1});
+    descriptors.push_back( {.var = 2, .x = 0, .y = 4});
+    descriptors.push_back( {.var = 0, .x = 3, .y = 4});
+    descriptors.push_back( {.var = 0, .x = 1, .y = 2});
+
+    ShapeSet shape_set(shapes, descriptors);
+
+    shape_set.draw(canvas);
+    print_bitmap(canvas);
 }
