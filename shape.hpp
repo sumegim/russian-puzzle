@@ -39,3 +39,34 @@ private:
     }
 
 };
+
+
+
+class ShapeMap : public Bitmap {
+
+public:
+    ShapeMap(int width, int height, char color = 'X', const char* data = nullptr)
+        : Bitmap(width, height, color, data)
+    {}
+
+    bool willDrawOver(const Bitmap& other, int x0, int y0) {
+        for (int y = y0; (y < height && (y-y0) < other.getHeight()); y++)
+            for (int x = x0; (x < width && (x-x0) < other.getWidth()); x++)
+                if (other.get(x-x0,y-y0) && get(x, y))
+                    return true;
+
+        return false;
+    }
+
+    bool placeIfNoOverlap(const Bitmap& other, int x0, int y0) {
+        if (willDrawOver(other, x0, y0))
+            return false;
+
+        drawColor(other, x0, y0);
+        return true;
+    }
+
+    bool operator==(const ShapeMap& other) {
+        return (static_cast<Bitmap>(*this) == other);
+    }
+};

@@ -87,4 +87,13 @@ int main() {
 
     shape_set.draw(canvas);
     print_bitmap(canvas);
+    printf("Valid: %d\n", shape_set.isValid());
+
+    // -------------------------------------------
+    descriptors[4].x++;
+    ShapeSet shape_set2(shapes, descriptors);
+
+    shape_set2.draw(canvas);
+    print_bitmap(canvas);
+    printf("Valid: %d\n", shape_set2.isValid());
 }
