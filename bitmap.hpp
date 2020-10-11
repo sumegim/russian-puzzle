@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstring>
 
 class Bitmap {
@@ -76,15 +77,21 @@ public:
     }
 
     void draw(const Bitmap& other, int x0, int y0) {
-        for (int y = y0; (y < height && (y-y0) < other.height); y++)
-            for (int x = x0; (x < width && (x-x0) < other.width); x++)
+        const int max_y = std::min(height, other.height + y0);
+        const int max_x = std::min(width, other.width + x0);
+
+        for (int y = y0; y < max_y; y++)
+            for (int x = x0; x < max_x; x++)
                 if (other.get(x-x0,y-y0))
                     set(x, y, other.color);
     }
 
     void undraw(const Bitmap& other, int x0, int y0) {
-        for (int y = y0; (y < height && (y-y0) < other.height); y++)
-            for (int x = x0; (x < width && (x-x0) < other.width); x++)
+        const int max_y = std::min(height, other.height + y0);
+        const int max_x = std::min(width, other.width + x0);
+
+        for (int y = y0; y < max_y; y++)
+            for (int x = x0; x < max_x; x++)
                 if (other.get(x-x0,y-y0))
                     set(x, y, 0);
     }

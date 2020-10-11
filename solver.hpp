@@ -5,7 +5,9 @@ typedef size_t attempt_counter_t;
 
 struct solving_info_t {
     attempt_counter_t attempts;
+    attempt_counter_t fits;
     size_t solutions;
+    size_t iterations;
 };
 
 struct ProgressNotifier {
@@ -28,7 +30,7 @@ public:
         : ShapeSet(shapes)
         , canvas(canvas)
         , notifier(notifier)
-        , info({.attempts = 0, .solutions = 0})
+        , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
     {}
 
@@ -38,25 +40,19 @@ public:
 
 private:
     bool tryToFitShape(const Shape& shape_to_fit, shape_desc_t& desc, bool skip_first = false) {
+        const size_t max_var = shape_to_fit.getNumOfVariants();
 
-        size_t max_var = shape_to_fit.getNumOfVariants();
-        const int max_y = canvas.getHeight();
-        const int max_x = canvas.getWidth();
+        if (skip_first)
+            desc.x++;
 
-        for (int y = desc.y; y < max_y; y++) {
-            for (int x = desc.x; x < max_x; x++) {
-                for (size_t var = desc.var; var < max_var; var++) {
-                    if (skip_first) {
-                        skip_first = false;
-                        continue;
-                    }
+        for (size_t var = desc.var; var < max_var; var++) {
+            const Bitmap& b = shape_to_fit.getVariant(var);
+            const int max_y = canvas.getHeight() - (b.getHeight() - 1);
+            const int max_x = canvas.getWidth() - (b.getWidth() - 1);
 
-                    const Bitmap& b = shape_to_fit.getVariant(var);
-
-                    if ((y + b.getHeight()) > max_y)
-                        continue;
-                    if ((x + b.getWidth()) > max_x)
-                        continue;
+            for (int y = desc.y; y < max_y; y++) {
+                for (int x = desc.x; x < max_x; x++) {
+                    info.iterations++;
 
                     if (canvas.placeIfNoOverlap(b, x, y)) {
                         flooder.draw(b, x, y);
@@ -67,9 +63,9 @@ private:
                         return true;
                     }
                 }
-                desc.var = 0;
+                desc.x = 0;
             }
-            desc.x = 0;
+            desc.y = 0;
         }
 
         return false;
@@ -90,14 +86,14 @@ private:
 
             if (fitted) {
                 refit = !fieldsAreOk();
-
-                if (refit) {
-                    //printf("BAD F\n");
-                    undrawLast();
-                }
                 notifier.handlePlacedShape(*this, info);
+
+                if (refit)
+                    undrawLast();
             }
         } while(fitted && refit);
+
+        info.fits++;
 
         if (!fitted)
             return FAIL;
@@ -138,13 +134,12 @@ private:
 
     bool fieldsAreOk() {
         size_t filled;
-        bool ok = true;
 
         while ((filled = flooder.findNextField())) {
             if ((filled % 5) != 0)
-                ok = false;
+                return false;
         }
 
-        return ok;
+        return true;
     }
 };
