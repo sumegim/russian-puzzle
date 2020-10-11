@@ -1,4 +1,5 @@
 #include "shapeset.hpp"
+#include "flood-filler.hpp"
 
 typedef size_t attempt_counter_t;
 
@@ -19,6 +20,7 @@ class Solver : public ShapeSet
     ShapeMap& canvas;
     ProgressNotifier& notifier;
     solving_info_t info;
+    FloodFiller flooder;
     enum fit_result_t{FIT, FAIL, SOLUTION, CONTINUE};
 
 public:
@@ -27,6 +29,7 @@ public:
         , canvas(canvas)
         , notifier(notifier)
         , info({.attempts = 0, .solutions = 0})
+        , flooder(canvas.getWidth(), canvas.getHeight())
     {}
 
     void solve() {
@@ -56,9 +59,11 @@ private:
                         continue;
 
                     if (canvas.placeIfNoOverlap(b, x, y)) {
+                        flooder.draw(b, x, y);
                         desc.var = var;
                         desc.x = x;
                         desc.y = y;
+                        descriptors.push_back(desc);
                         return true;
                     }
                 }
@@ -71,19 +76,32 @@ private:
     }
 
     fit_result_t tryToFit(bool refit = false) {
+        bool fitted;
         shape_desc_t desc;
 
-        info.attempts++;
         if (refit)
-            desc = undrawLast(canvas);
+            desc = undrawLast();
         else
             desc = {.var = 0, .x = 0, .y = 0};
 
-        if (!tryToFitShape(shapes[descriptors.size()], desc, refit))
+        do {
+            info.attempts++;
+            fitted = tryToFitShape(shapes[descriptors.size()], desc, refit);
+
+            if (fitted) {
+                refit = !fieldsAreOk();
+
+                if (refit) {
+                    //printf("BAD F\n");
+                    undrawLast();
+                }
+                notifier.handlePlacedShape(*this, info);
+            }
+        } while(fitted && refit);
+
+        if (!fitted)
             return FAIL;
         else {
-            descriptors.push_back(desc);
-            notifier.handlePlacedShape(*this, info);
             return ((descriptors.size() == shapes.size()) ? SOLUTION : FIT);
         }
     }
@@ -99,7 +117,7 @@ private:
             else if (res == SOLUTION) {
                 info.solutions++;
                 notifier.handleSolution(*this, info);
-                undrawLast(canvas);
+                undrawLast();
                 return CONTINUE;
             }
             else
@@ -109,5 +127,24 @@ private:
         } while (descriptors.size() > 0);
 
         return res;
+    }
+
+    shape_desc_t undrawLast() {
+        shape_desc_t desc = ShapeSet::undrawLast(canvas);
+        const Bitmap& b = shapes[descriptors.size()].getVariant(desc.var);
+        flooder.undraw(b, desc.x, desc.y);
+        return desc;
+    }
+
+    bool fieldsAreOk() {
+        size_t filled;
+        bool ok = true;
+
+        while ((filled = flooder.findNextField())) {
+            if ((filled % 5) != 0)
+                ok = false;
+        }
+
+        return ok;
     }
 };
