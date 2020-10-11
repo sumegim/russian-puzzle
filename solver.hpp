@@ -5,7 +5,9 @@ typedef size_t attempt_counter_t;
 
 struct solving_info_t {
     attempt_counter_t attempts;
+    attempt_counter_t fits;
     size_t solutions;
+    size_t iterations;
 };
 
 struct ProgressNotifier {
@@ -28,7 +30,7 @@ public:
         : ShapeSet(shapes)
         , canvas(canvas)
         , notifier(notifier)
-        , info({.attempts = 0, .solutions = 0})
+        , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
     {}
 
@@ -46,6 +48,8 @@ private:
         for (int y = desc.y; y < max_y; y++) {
             for (int x = desc.x; x < max_x; x++) {
                 for (size_t var = desc.var; var < max_var; var++) {
+                    info.iterations++;
+
                     if (skip_first) {
                         skip_first = false;
                         continue;
@@ -98,6 +102,8 @@ private:
                 notifier.handlePlacedShape(*this, info);
             }
         } while(fitted && refit);
+
+        info.fits++;
 
         if (!fitted)
             return FAIL;

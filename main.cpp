@@ -77,18 +77,33 @@ void print_bitmap(const Bitmap& bitmap) {
 class MyNotifier : public ProgressNotifier {
     ShapeMap myCanvas;
     time_t last_timestamp;
+    time_t started;
 
 public:
     MyNotifier()
         : myCanvas(10,6)
         , last_timestamp(0)
+        , started(0)
     {}
 
     virtual void handlePlacedShape(const ShapeSet& solution, solving_info_t info) override{
         time_t now = time(NULL);
 
-        if (now > last_timestamp) {
-            printf("%4.1f M, %lu\n", (float)info.attempts/1000000, info.solutions);
+        if (started == 0) {
+            started = now;
+            last_timestamp = now;
+        }
+        else if (now > last_timestamp) {
+            float sol = (float)info.solutions/(now-started);
+            float speed = (float)info.iterations/1000000/(now-started);
+            printf("%4lu sol, %4.1f sol/s (%5.1f Ma, %2.0f%%, %3.1f MF/s %3.0f%%)\n"
+                , info.solutions
+                , sol
+                , (float)info.attempts/1000000
+                , (float)info.fits/info.attempts*100
+                , speed
+                , sol/speed*100
+            );
             //solution.draw(myCanvas);
             //print_bitmap(myCanvas);
             last_timestamp = now;
@@ -96,8 +111,8 @@ public:
     }
 
     virtual void handleSolution(const ShapeSet& solution, solving_info_t info) override{
-        solution.draw(myCanvas);
-        print_bitmap(myCanvas);
+        //solution.draw(myCanvas);
+        //print_bitmap(myCanvas);
     }
 };
 
