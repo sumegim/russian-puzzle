@@ -86,12 +86,10 @@ private:
 
             if (fitted) {
                 refit = !fieldsAreOk();
-
-                if (refit) {
-                    //printf("BAD F\n");
-                    undrawLast();
-                }
                 notifier.handlePlacedShape(*this, info);
+
+                if (refit)
+                    undrawLast();
             }
         } while(fitted && refit);
 
@@ -136,13 +134,12 @@ private:
 
     bool fieldsAreOk() {
         size_t filled;
-        bool ok = true;
 
         while ((filled = flooder.findNextField())) {
             if ((filled % 5) != 0)
-                ok = false;
+                return false;
         }
 
-        return ok;
+        return true;
     }
 };
