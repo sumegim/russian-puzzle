@@ -45,16 +45,13 @@ private:
         const int max_y = canvas.getHeight();
         const int max_x = canvas.getWidth();
 
+        if (skip_first)
+            desc.var++;
+
         for (int y = desc.y; y < max_y; y++) {
             for (int x = desc.x; x < max_x; x++) {
                 for (size_t var = desc.var; var < max_var; var++) {
                     info.iterations++;
-
-                    if (skip_first) {
-                        skip_first = false;
-                        continue;
-                    }
-
                     const Bitmap& b = shape_to_fit.getVariant(var);
 
                     if ((y + b.getHeight()) > max_y)
