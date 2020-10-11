@@ -16,9 +16,11 @@ public:
 
     void draw(const Bitmap& other, int x0, int y0) {
         const char color = other.getColor();
+        const int max_y = std::min(height, other.getHeight() + y0);
+        const int max_x = std::min(width, other.getWidth() + x0);
 
-        for (int y = y0; (y < height && (y-y0) < other.getHeight()); y++)
-            for (int x = x0; (x < width && (x-x0) < other.getWidth()); x++)
+        for (int y = y0; y < max_y; y++)
+            for (int x = x0; x < max_x; x++)
                 if (other.get(x-x0,y-y0)) {
                     if (get(x, y))
                         removeField(get(x, y));
@@ -28,8 +30,11 @@ public:
     }
 
     void undraw(const Bitmap& other, int x0, int y0) {
-        for (int y = y0; (y < height && (y-y0) < other.getHeight()); y++)
-            for (int x = x0; (x < width && (x-x0) < other.getWidth()); x++)
+        const int max_y = std::min(height, other.getHeight() + y0);
+        const int max_x = std::min(width, other.getWidth() + x0);
+
+        for (int y = y0; y < max_y; y++)
+            for (int x = x0; x < max_x; x++)
                 if (other.get(x-x0,y-y0)) {
                     set(x, y, 0);
                     area--;
