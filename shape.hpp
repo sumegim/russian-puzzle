@@ -62,7 +62,7 @@ public:
         if (willDrawOver(other, x0, y0))
             return false;
 
-        drawColor(other, x0, y0);
+        draw(other, x0, y0);
         return true;
     }
 

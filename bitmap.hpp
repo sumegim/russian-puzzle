@@ -10,6 +10,7 @@ protected:
     int width;
     int height;
     char color;
+    size_t area;
     char buffer[MAX_WIDTH * MAX_HEIGHT];
 
 public:
@@ -17,12 +18,16 @@ public:
         : width(width)
         , height(height)
         , color(color)
+        , area(0)
     {
         memset(buffer, 0, MAX_WIDTH * MAX_HEIGHT);
 
         if (data)
             for (int i = 0; i < width*height; i++)
-                buffer[i] = data[i];
+                if (data[i]) {
+                    buffer[i] = data[i];
+                    area++;
+                }
     }
 
     const int getWidth() const {
@@ -31,6 +36,18 @@ public:
 
     const int getHeight() const {
         return height;
+    }
+
+    const char getColor() const {
+        return color;
+    }
+
+    const size_t getArea() const {
+        return area;
+    }
+
+    const size_t getTotalArea() const {
+        return width*height;
     }
 
     char get(int x, int y) const {
@@ -59,13 +76,6 @@ public:
     }
 
     void draw(const Bitmap& other, int x0, int y0) {
-        for (int y = y0; (y < height && (y-y0) < other.height); y++)
-            for (int x = x0; (x < width && (x-x0) < other.width); x++)
-                if (other.get(x-x0,y-y0))
-                    inc(x ,y);
-    }
-
-    void drawColor(const Bitmap& other, int x0, int y0) {
         for (int y = y0; (y < height && (y-y0) < other.height); y++)
             for (int x = x0; (x < width && (x-x0) < other.width); x++)
                 if (other.get(x-x0,y-y0))
