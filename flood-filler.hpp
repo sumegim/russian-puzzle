@@ -5,6 +5,7 @@
 class FloodFiller : protected Bitmap {
     char fields;
     size_t filledArea;
+    static const char FIELD_MAX_NUM = 47;
 
 public:
     FloodFiller(int width, int height)
@@ -15,21 +16,15 @@ public:
 
     void draw(const Bitmap& other, int x0, int y0) {
         const char color = other.getColor();
-        bool was_removed = false;
 
         for (int y = y0; (y < height && (y-y0) < other.getHeight()); y++)
             for (int x = x0; (x < width && (x-x0) < other.getWidth()); x++)
                 if (other.get(x-x0,y-y0)) {
-                    //char f = get(x, y);
-                    //if (f && !was_removed) {
-                    //    removeField(f);
-                    //    was_removed = false;
-                    //}
+                    if (get(x, y))
+                        removeField(get(x, y));
                     set(x, y, color);
                     area++;
                 }
-
-        reset();
     }
 
     void undraw(const Bitmap& other, int x0, int y0) {
@@ -46,14 +41,17 @@ public:
     size_t findNextField() {
         int x0, y0;
 
-        if (fields > getTotalArea()) {
+        if (fields >= FIELD_MAX_NUM) {
             printf("you have fucked up something son\n");
+            *((int*)nullptr) = 5;
             return 0;
         }
 
         if (!findStartingPoint(x0, y0)) {
-            if (area + filledArea != getTotalArea())
+            if (area + filledArea != getTotalArea()) {
                 printf("you have fucked up something son\n");
+                *((int*)nullptr) = 5;
+            }
             return 0;
         }
 
@@ -66,9 +64,8 @@ public:
     void reset() {
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
-                if (get(x,y) <= fields) {
+                if (get(x,y) <= FIELD_MAX_NUM)
                     set(x,y,0);
-                }
 
         fields = 0;
         filledArea = 0;
@@ -117,10 +114,7 @@ private:
                     area_cleared++;
                 }
 
-        if (area_cleared) {
-            fields--;
-            filledArea -= area_cleared;
-        }
+        fields--;
+        filledArea -= area_cleared;
     }
-
 };
