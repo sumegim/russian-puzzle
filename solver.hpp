@@ -24,6 +24,7 @@ class Solver : public ShapeSet
     solving_info_t info;
     FloodFiller flooder;
     enum fit_result_t{FIT, FAIL, SOLUTION, CONTINUE};
+    int minX, minY, maxX, maxY;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -32,6 +33,10 @@ public:
         , notifier(notifier)
         , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
+        , minX(0)
+        , minY(0)
+        , maxX(canvas.getWidth()-1)
+        , maxY(canvas.getHeight()-1)
     {}
 
     void solve() {
@@ -47,8 +52,8 @@ private:
 
         for (size_t var = desc.var; var < max_var; var++) {
             const Bitmap& b = shape_to_fit.getVariant(var);
-            const int max_y = canvas.getHeight() - (b.getHeight() - 1);
-            const int max_x = canvas.getWidth() - (b.getWidth() - 1);
+            const int max_y = (maxY + 1) - (b.getHeight() - 1);
+            const int max_x = (maxX + 1) - (b.getWidth() - 1);
 
             for (int y = desc.y; y < max_y; y++) {
                 for (int x = desc.x; x < max_x; x++) {
@@ -63,9 +68,9 @@ private:
                         return true;
                     }
                 }
-                desc.x = 0;
+                desc.x = minX;
             }
-            desc.y = 0;
+            desc.y = minY;
         }
 
         return false;
@@ -75,10 +80,12 @@ private:
         bool fitted;
         shape_desc_t desc;
 
+        updateRowCol();
+
         if (refit)
             desc = undrawLast();
         else
-            desc = {.var = 0, .x = 0, .y = 0};
+            desc = {.var = 0, .x = minX, .y = minY};
 
         do {
             info.attempts++;
@@ -141,5 +148,41 @@ private:
         }
 
         return true;
+    }
+
+    bool isColFilled (int y) {
+        for (int x = 0; x < canvas.getWidth(); x++)
+            if (!canvas.get(x, y))
+                return false;
+
+        return true;
+    }
+
+    bool isRowFilled (int x) {
+        for (int y = 0; y < canvas.getHeight(); y++)
+            if (!canvas.get(x, y))
+                return false;
+
+        return true;
+    }
+
+    void updateRowCol() {
+        // cols
+        minY = 0;
+        while (isColFilled(minY))
+            minY++;
+
+        maxY = (canvas.getHeight() - 1);
+        while (isColFilled(maxY))
+            maxY--;
+
+        // rows
+        minX = 0;
+        while (isRowFilled(minX))
+            minX++;
+
+        maxX = (canvas.getWidth() - 1);
+        while (isRowFilled(maxX))
+            maxX--;
     }
 };
