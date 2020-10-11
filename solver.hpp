@@ -40,24 +40,19 @@ public:
 
 private:
     bool tryToFitShape(const Shape& shape_to_fit, shape_desc_t& desc, bool skip_first = false) {
-
-        size_t max_var = shape_to_fit.getNumOfVariants();
-        const int max_y = canvas.getHeight();
-        const int max_x = canvas.getWidth();
+        const size_t max_var = shape_to_fit.getNumOfVariants();
 
         if (skip_first)
-            desc.var++;
+            desc.x++;
 
-        for (int y = desc.y; y < max_y; y++) {
-            for (int x = desc.x; x < max_x; x++) {
-                for (size_t var = desc.var; var < max_var; var++) {
+        for (size_t var = desc.var; var < max_var; var++) {
+            const Bitmap& b = shape_to_fit.getVariant(var);
+            const int max_y = canvas.getHeight() - (b.getHeight() - 1);
+            const int max_x = canvas.getWidth() - (b.getWidth() - 1);
+
+            for (int y = desc.y; y < max_y; y++) {
+                for (int x = desc.x; x < max_x; x++) {
                     info.iterations++;
-                    const Bitmap& b = shape_to_fit.getVariant(var);
-
-                    if ((y + b.getHeight()) > max_y)
-                        continue;
-                    if ((x + b.getWidth()) > max_x)
-                        continue;
 
                     if (canvas.placeIfNoOverlap(b, x, y)) {
                         flooder.draw(b, x, y);
@@ -68,9 +63,9 @@ private:
                         return true;
                     }
                 }
-                desc.var = 0;
+                desc.x = 0;
             }
-            desc.x = 0;
+            desc.y = 0;
         }
 
         return false;
