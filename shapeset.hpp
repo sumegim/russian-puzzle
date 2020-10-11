@@ -28,7 +28,7 @@ public:
         canvas.clear();
 
         for (size_t i = 0; i < descriptors.size(); i++)
-            canvas.drawColor(shapes[i].getVariant(descriptors[i].var),
+            canvas.draw(shapes[i].getVariant(descriptors[i].var),
                              descriptors[i].x,
                              descriptors[i].y);
     }

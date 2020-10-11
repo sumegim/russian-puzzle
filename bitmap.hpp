@@ -62,13 +62,6 @@ public:
         for (int y = y0; (y < height && (y-y0) < other.height); y++)
             for (int x = x0; (x < width && (x-x0) < other.width); x++)
                 if (other.get(x-x0,y-y0))
-                    inc(x ,y);
-    }
-
-    void drawColor(const Bitmap& other, int x0, int y0) {
-        for (int y = y0; (y < height && (y-y0) < other.height); y++)
-            for (int x = x0; (x < width && (x-x0) < other.width); x++)
-                if (other.get(x-x0,y-y0))
                     set(x, y, other.color);
     }
 
