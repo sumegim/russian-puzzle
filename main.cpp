@@ -5,10 +5,6 @@
 
 constexpr size_t SHAPE_NUM = 12;
 const Shape shapes_arr[SHAPE_NUM]{
-    (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
-    (Bitmap) {4, 2, 'B', (const char[]) {0, 1, 1, 1, 1, 1, 0, 0,}},
-    (Bitmap) {4, 2, 'C', (const char[]) {1, 1, 1, 1, 1, 0, 0, 0,}},
-    (Bitmap) {4, 2, 'D', (const char[]) {1, 1, 1, 1, 0, 1, 0, 0,}},
     (Bitmap) {3, 3, 'E', (const char[]) {1, 1, 1, 0, 1, 0, 0, 1, 0}},
     (Bitmap) {3, 3, 'F', (const char[]) {0, 1, 0, 1, 1, 1, 0, 1, 0}},
     (Bitmap) {3, 3, 'G', (const char[]) {1, 1, 0, 0, 1, 0, 0, 1, 1}},
@@ -17,6 +13,10 @@ const Shape shapes_arr[SHAPE_NUM]{
     (Bitmap) {3, 3, 'J', (const char[]) {1, 1, 0, 0, 1, 1, 0, 0, 1}},
     (Bitmap) {3, 2, 'K', (const char[]) {1, 0, 1, 1, 1, 1}},
     (Bitmap) {3, 2, 'L', (const char[]) {1, 1, 1, 1, 1, 0}},
+    (Bitmap) {4, 2, 'B', (const char[]) {0, 1, 1, 1, 1, 1, 0, 0,}},
+    (Bitmap) {4, 2, 'C', (const char[]) {1, 1, 1, 1, 1, 0, 0, 0,}},
+    (Bitmap) {4, 2, 'D', (const char[]) {1, 1, 1, 1, 0, 1, 0, 0,}},
+    (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
 };
 ConstFastVector<Shape> shapes(shapes_arr, SHAPE_NUM);
 
@@ -98,7 +98,7 @@ public:
         else if (now > last_timestamp) {
             float sol = (float)info.solutions/(now-started);
             float speed = (float)info.iterations/1000000/(now-started);
-            printf("%4lu sol %4.1f sol/s - %5.1f Ma (%2.0f%%) %3.1f Mi/s %.2f sol/Mi\n"
+            printf("%4lu sol %5.1f sol/s - %5.1f Ma (%2.0f%%) %3.1f Mi/s %.2f sol/Mi\n"
                 , info.solutions
                 , sol
                 , (float)info.attempts/1000000
