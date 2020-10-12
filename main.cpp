@@ -119,10 +119,10 @@ public:
                 , speed
                 , sol/speed
             );
-            //solution.draw(myCanvas);
-            //print_bitmap(myCanvas);
             last_timestamp = now;
         }
+        solution.draw(myCanvas);
+        print_bitmap(myCanvas);
     }
 
     virtual void handleSolution(const ShapeSet& solution, solving_info_t info) override{
@@ -161,7 +161,7 @@ int main() {
 int main() {
     ShapeMap canvas(MAP_WIDTH, MAP_HEIGHT);
     MyNotifier notifier(canvas);
-    Solver solver(shapes, canvas, notifier);
+    Solver solver(shapes, canvas, notifier, 0, 0);
 
     solver.solve();
 }

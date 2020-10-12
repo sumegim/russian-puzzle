@@ -20,7 +20,7 @@ struct ProgressNotifier {
 
 class Solver : public ShapeSet
 {
-    enum fit_result_t {FIT, FAIL, SOLUTION, CONTINUE};
+    enum fit_result_t {FIT, FAIL, SOLUTION, CONTINUE, ABORTED};
 
 
     ShapeMap& canvas;
@@ -29,7 +29,8 @@ class Solver : public ShapeSet
     FloodFiller flooder;
     frame_limit_t frameLimit;
     FastVector<frame_limit_t> frameLimits;
-    const size_t refitLimit;
+    bool firstIsFixed;
+    int firstX, firstY;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -39,17 +40,19 @@ public:
         , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
         , frameLimit({.minX = 0, .minY = 0, .maxX = (canvas.getWidth()-1), .maxY = (canvas.getHeight()-1)})
-        , refitLimit(0)
+        , firstIsFixed(false)
     {}
 
-    Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier, const descriptors_t& descriptors)
-        : ShapeSet(shapes, descriptors)
+    Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier,int firstX, int firstY)
+        : ShapeSet(shapes)
         , canvas(canvas)
         , notifier(notifier)
         , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
         , frameLimit({.minX = 0, .minY = 0, .maxX = (canvas.getWidth()-1), .maxY = (canvas.getHeight()-1)})
-        , refitLimit(descriptors.size())
+        , firstIsFixed(true)
+        , firstX(firstX)
+        , firstY(firstY)
     {}
 
     void solve() {
@@ -98,8 +101,16 @@ private:
             desc = undrawLast();
         else {
             desc.var = 0;
-            desc.x = frameLimit.minX;
-            desc.y = frameLimit.minY;
+
+            if (firstIsFixed) {
+                desc.x = firstX;
+                desc.y = firstY;
+            }
+            else {
+                desc.x = frameLimit.minX;
+                desc.y = frameLimit.minY;
+            }
+
             static_cast<frame_limit_t&>(desc) = frameLimit;
         }
 
@@ -144,7 +155,7 @@ private:
                 return res;
 
             refit = true;
-        } while (descriptors.size() > refitLimit);
+        } while (descriptors.size() > 0);
 
         return res;
     }
