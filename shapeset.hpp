@@ -1,6 +1,10 @@
 #include "shape.hpp"
 
-struct shape_desc_t {
+struct frame_limit_t {
+    int minX, minY, maxX, maxY;
+};
+
+struct shape_desc_t : public frame_limit_t {
     size_t var;
     int x;
     int y;

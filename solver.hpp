@@ -19,11 +19,15 @@ struct ProgressNotifier {
 
 class Solver : public ShapeSet
 {
+    enum fit_result_t {FIT, FAIL, SOLUTION, CONTINUE};
+
+
     ShapeMap& canvas;
     ProgressNotifier& notifier;
     solving_info_t info;
     FloodFiller flooder;
-    enum fit_result_t{FIT, FAIL, SOLUTION, CONTINUE};
+    frame_limit_t frameLimit;
+    std::vector<frame_limit_t> frameLimits;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -32,6 +36,7 @@ public:
         , notifier(notifier)
         , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
+        , frameLimit({.minX = 0, .minY = 0, .maxX = (canvas.getWidth()-1), .maxY = (canvas.getHeight()-1)})
     {}
 
     void solve() {
@@ -47,8 +52,8 @@ private:
 
         for (size_t var = desc.var; var < max_var; var++) {
             const Bitmap& b = shape_to_fit.getVariant(var);
-            const int max_y = canvas.getHeight() - (b.getHeight() - 1);
-            const int max_x = canvas.getWidth() - (b.getWidth() - 1);
+            const int max_y = (frameLimit.maxY + 1) - (b.getHeight() - 1);
+            const int max_x = (frameLimit.maxX + 1) - (b.getWidth() - 1);
 
             for (int y = desc.y; y < max_y; y++) {
                 for (int x = desc.x; x < max_x; x++) {
@@ -63,9 +68,9 @@ private:
                         return true;
                     }
                 }
-                desc.x = 0;
+                desc.x = frameLimit.minX;
             }
-            desc.y = 0;
+            desc.y = frameLimit.minY;
         }
 
         return false;
@@ -77,8 +82,12 @@ private:
 
         if (refit)
             desc = undrawLast();
-        else
-            desc = {.var = 0, .x = 0, .y = 0};
+        else {
+            desc.var = 0;
+            desc.x = frameLimit.minX;
+            desc.y = frameLimit.minY;
+            static_cast<frame_limit_t&>(desc) = frameLimit;
+        }
 
         do {
             info.attempts++;
@@ -89,7 +98,7 @@ private:
                 notifier.handlePlacedShape(*this, info);
 
                 if (refit)
-                    undrawLast();
+                    undrawLast(false);
             }
         } while(fitted && refit);
 
@@ -98,6 +107,7 @@ private:
         if (!fitted)
             return FAIL;
         else {
+            updateFrameLimit();
             return ((descriptors.size() == shapes.size()) ? SOLUTION : FIT);
         }
     }
@@ -125,10 +135,15 @@ private:
         return res;
     }
 
-    shape_desc_t undrawLast() {
+    shape_desc_t undrawLast(bool pop_frame = true) {
         shape_desc_t desc = ShapeSet::undrawLast(canvas);
         const Bitmap& b = shapes[descriptors.size()].getVariant(desc.var);
         flooder.undraw(b, desc.x, desc.y);
+
+        if (pop_frame) {
+            frameLimit = (frame_limit_t)desc;
+        }
+
         return desc;
     }
 
@@ -141,5 +156,37 @@ private:
         }
 
         return true;
+    }
+
+    bool isColFilled (int y) {
+        for (int x = 0; x < canvas.getWidth(); x++)
+            if (!canvas.get(x, y))
+                return false;
+
+        return true;
+    }
+
+    bool isRowFilled (int x) {
+        for (int y = 0; y < canvas.getHeight(); y++)
+            if (!canvas.get(x, y))
+                return false;
+
+        return true;
+    }
+
+    void updateFrameLimit() {
+        // cols
+        while (isColFilled(frameLimit.minY))
+            frameLimit.minY++;
+
+        while (isColFilled(frameLimit.maxY))
+            frameLimit.maxY--;
+
+        // rows
+        while (isRowFilled(frameLimit.minX))
+            frameLimit.minX++;
+
+        while (isRowFilled(frameLimit.maxX))
+            frameLimit.maxX--;
     }
 };
