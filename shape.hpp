@@ -49,6 +49,10 @@ public:
         : Bitmap(width, height, color, data)
     {}
 
+    ShapeMap(const ShapeMap& other)
+        : Bitmap(other.width, other.height, other.color, other.buffer)
+    {}
+
     bool willDrawOver(const Bitmap& other, int x0, int y0) {
         const int max_y = std::min(height, other.getHeight() + y0);
         const int max_x = std::min(width, other.getWidth() + x0);

@@ -37,21 +37,6 @@ public:
                              descriptors[i].y);
     }
 
-    bool isValid() {
-        ShapeMap canvas(10, 6);
-
-        for (size_t i = 0; i < descriptors.size(); i++) {
-            if (!canvas.placeIfNoOverlap(
-                shapes[i].getVariant(descriptors[i].var),
-                descriptors[i].x,
-                descriptors[i].y)
-            )
-                return false;
-        }
-
-        return true;
-    }
-
     shape_desc_t undrawLast(ShapeMap& canvas) {
         shape_desc_t desc;
 

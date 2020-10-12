@@ -54,7 +54,7 @@ const char* get_marker(char c) {
 }
 
 void print_bitmap(const Bitmap& bitmap) {
-    char line_buff[128];
+    static char line_buff[1024];
 
     printf("--------------------------------\n");
     for (int y = 0; y < bitmap.getHeight(); y++) {
@@ -82,8 +82,8 @@ class MyNotifier : public ProgressNotifier {
     time_t started;
 
 public:
-    MyNotifier()
-        : myCanvas(10,6)
+    MyNotifier(const ShapeMap& canvas)
+        : myCanvas(canvas)
         , last_timestamp(0)
         , started(0)
     {}
@@ -120,8 +120,8 @@ public:
 
 
 int main() {
-    ShapeMap canvas(10,6);
-    MyNotifier notifier;
+    ShapeMap canvas(10, 6);
+    MyNotifier notifier(canvas);
     Solver solver(shapes, canvas, notifier);
 
     solver.solve();
