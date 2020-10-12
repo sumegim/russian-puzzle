@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef MULTI_PROC
+#include <omp.h>
+#endif
+
 #include "solver.hpp"
 
+constexpr size_t MAP_WIDTH = 10;
+constexpr size_t MAP_HEIGHT = 6;
 constexpr size_t SHAPE_NUM = 12;
+
 const Shape shapes_arr[SHAPE_NUM]{
     (Bitmap) {3, 3, 'X', (const char[]) {0, 1, 0, 1, 1, 1, 0, 1, 0}},
     (Bitmap) {3, 3, 'T', (const char[]) {1, 1, 1, 0, 1, 0, 0, 1, 0}},
@@ -88,6 +95,12 @@ public:
         , started(0)
     {}
 
+    MyNotifier(int width, int height)
+        : myCanvas(width, height)
+        , last_timestamp(0)
+        , started(0)
+    {}
+
     virtual void handlePlacedShape(const ShapeSet& solution, solving_info_t info) override{
         time_t now = time(NULL);
 
@@ -125,10 +138,31 @@ public:
 };
 
 
+#ifdef MULTI_PROC
 int main() {
-    ShapeMap canvas(10, 6);
+    MyNotifier notifier(MAP_WIDTH, MAP_HEIGHT);
+
+    #pragma omp parallel for
+    for(int i = 0; i < 8; i++) {
+        ShapeMap canvas(MAP_WIDTH, MAP_HEIGHT);
+        descriptors_t descriptors;
+        shape_desc_t desc;
+
+        printf("Starting proc %d...\n", i);
+        desc.x = (i%4)+1;
+        desc.y = (i/4)+1;
+        descriptors.push(desc);
+        Solver solver(shapes, canvas, notifier, descriptors);
+        solver.solve();
+        printf("Finished proc %d...\n", i);
+    }
+}
+#else
+int main() {
+    ShapeMap canvas(MAP_WIDTH, MAP_HEIGHT);
     MyNotifier notifier(canvas);
     Solver solver(shapes, canvas, notifier);
 
     solver.solve();
 }
+#endif

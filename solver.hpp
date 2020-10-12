@@ -29,6 +29,7 @@ class Solver : public ShapeSet
     FloodFiller flooder;
     frame_limit_t frameLimit;
     FastVector<frame_limit_t> frameLimits;
+    const size_t refitLimit;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -38,6 +39,17 @@ public:
         , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
         , flooder(canvas.getWidth(), canvas.getHeight())
         , frameLimit({.minX = 0, .minY = 0, .maxX = (canvas.getWidth()-1), .maxY = (canvas.getHeight()-1)})
+        , refitLimit(0)
+    {}
+
+    Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier, const descriptors_t& descriptors)
+        : ShapeSet(shapes, descriptors)
+        , canvas(canvas)
+        , notifier(notifier)
+        , info({.attempts = 0, .fits = 0, .solutions = 0, .iterations = 0})
+        , flooder(canvas.getWidth(), canvas.getHeight())
+        , frameLimit({.minX = 0, .minY = 0, .maxX = (canvas.getWidth()-1), .maxY = (canvas.getHeight()-1)})
+        , refitLimit(descriptors.size())
     {}
 
     void solve() {
@@ -132,7 +144,7 @@ private:
                 return res;
 
             refit = true;
-        } while (descriptors.size() > 0);
+        } while (descriptors.size() > refitLimit);
 
         return res;
     }
