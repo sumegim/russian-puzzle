@@ -116,6 +116,12 @@ public:
         //solution.draw(myCanvas);
         //print_bitmap(myCanvas);
     }
+
+    virtual void handleFinish(solving_info_t info) override{
+        time_t now = time(NULL);
+        printf("Finished!\n\n");
+        printf("Found %5ld solutions in %lu seconds\n", info.solutions, now-started);
+    }
 };
 
 

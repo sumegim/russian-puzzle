@@ -13,6 +13,7 @@ struct solving_info_t {
 struct ProgressNotifier {
     virtual void handlePlacedShape(const ShapeSet& solution, solving_info_t info) {}
     virtual void handleSolution(const ShapeSet& solution, solving_info_t info) {}
+    virtual void handleFinish(solving_info_t info) {}
 };
 
 
@@ -41,6 +42,7 @@ public:
 
     void solve() {
         fitNextRecursive();
+        notifier.handleFinish(info);
     }
 
 private:
