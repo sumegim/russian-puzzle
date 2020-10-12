@@ -96,13 +96,13 @@ public:
         else if (now > last_timestamp) {
             float sol = (float)info.solutions/(now-started);
             float speed = (float)info.iterations/1000000/(now-started);
-            printf("%4lu sol, %4.1f sol/s (%5.1f Ma, %2.0f%%, %3.1f MF/s %3.0f%%)\n"
+            printf("%4lu sol %4.1f sol/s - %5.1f Ma (%2.0f%%) %3.1f Mi/s %.2f sol/Mi\n"
                 , info.solutions
                 , sol
                 , (float)info.attempts/1000000
                 , (float)info.fits/info.attempts*100
                 , speed
-                , sol/speed*100
+                , sol/speed
             );
             //solution.draw(myCanvas);
             //print_bitmap(myCanvas);
