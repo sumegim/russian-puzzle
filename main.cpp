@@ -3,11 +3,8 @@
 
 #include "solver.hpp"
 
-const std::vector<Shape> shapes{
-    (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
-    (Bitmap) {4, 2, 'B', (const char[]) {0, 1, 1, 1, 1, 1, 0, 0,}},
-    (Bitmap) {4, 2, 'C', (const char[]) {1, 1, 1, 1, 1, 0, 0, 0,}},
-    (Bitmap) {4, 2, 'D', (const char[]) {1, 1, 1, 1, 0, 1, 0, 0,}},
+constexpr size_t SHAPE_NUM = 12;
+const Shape shapes_arr[SHAPE_NUM]{
     (Bitmap) {3, 3, 'E', (const char[]) {1, 1, 1, 0, 1, 0, 0, 1, 0}},
     (Bitmap) {3, 3, 'F', (const char[]) {0, 1, 0, 1, 1, 1, 0, 1, 0}},
     (Bitmap) {3, 3, 'G', (const char[]) {1, 1, 0, 0, 1, 0, 0, 1, 1}},
@@ -16,7 +13,12 @@ const std::vector<Shape> shapes{
     (Bitmap) {3, 3, 'J', (const char[]) {1, 1, 0, 0, 1, 1, 0, 0, 1}},
     (Bitmap) {3, 2, 'K', (const char[]) {1, 0, 1, 1, 1, 1}},
     (Bitmap) {3, 2, 'L', (const char[]) {1, 1, 1, 1, 1, 0}},
+    (Bitmap) {4, 2, 'B', (const char[]) {0, 1, 1, 1, 1, 1, 0, 0,}},
+    (Bitmap) {4, 2, 'C', (const char[]) {1, 1, 1, 1, 1, 0, 0, 0,}},
+    (Bitmap) {4, 2, 'D', (const char[]) {1, 1, 1, 1, 0, 1, 0, 0,}},
+    (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
 };
+ConstFastVector<Shape> shapes(shapes_arr, SHAPE_NUM);
 
 
 #define COLOR_AFTER "\033[0m"
@@ -52,7 +54,7 @@ const char* get_marker(char c) {
 }
 
 void print_bitmap(const Bitmap& bitmap) {
-    char line_buff[128];
+    static char line_buff[1024];
 
     printf("--------------------------------\n");
     for (int y = 0; y < bitmap.getHeight(); y++) {
@@ -80,8 +82,8 @@ class MyNotifier : public ProgressNotifier {
     time_t started;
 
 public:
-    MyNotifier()
-        : myCanvas(10,6)
+    MyNotifier(const ShapeMap& canvas)
+        : myCanvas(canvas)
         , last_timestamp(0)
         , started(0)
     {}
@@ -96,13 +98,13 @@ public:
         else if (now > last_timestamp) {
             float sol = (float)info.solutions/(now-started);
             float speed = (float)info.iterations/1000000/(now-started);
-            printf("%4lu sol, %4.1f sol/s (%5.1f Ma, %2.0f%%, %3.1f MF/s %3.0f%%)\n"
+            printf("%4lu sol %5.1f sol/s - %5.1f Ma (%2.0f%%) %3.1f Mi/s %.2f sol/Mi\n"
                 , info.solutions
                 , sol
                 , (float)info.attempts/1000000
                 , (float)info.fits/info.attempts*100
                 , speed
-                , sol/speed*100
+                , sol/speed
             );
             //solution.draw(myCanvas);
             //print_bitmap(myCanvas);
@@ -114,12 +116,18 @@ public:
         //solution.draw(myCanvas);
         //print_bitmap(myCanvas);
     }
+
+    virtual void handleFinish(solving_info_t info) override{
+        time_t now = time(NULL);
+        printf("Finished!\n\n");
+        printf("Found %5ld solutions in %lu seconds\n", info.solutions, now-started);
+    }
 };
 
 
 int main() {
-    ShapeMap canvas(10,6);
-    MyNotifier notifier;
+    ShapeMap canvas(10, 6);
+    MyNotifier notifier(canvas);
     Solver solver(shapes, canvas, notifier);
 
     solver.solve();

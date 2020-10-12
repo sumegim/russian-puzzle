@@ -13,6 +13,7 @@ struct solving_info_t {
 struct ProgressNotifier {
     virtual void handlePlacedShape(const ShapeSet& solution, solving_info_t info) {}
     virtual void handleSolution(const ShapeSet& solution, solving_info_t info) {}
+    virtual void handleFinish(solving_info_t info) {}
 };
 
 
@@ -27,7 +28,7 @@ class Solver : public ShapeSet
     solving_info_t info;
     FloodFiller flooder;
     frame_limit_t frameLimit;
-    std::vector<frame_limit_t> frameLimits;
+    FastVector<frame_limit_t> frameLimits;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -41,6 +42,7 @@ public:
 
     void solve() {
         fitNextRecursive();
+        notifier.handleFinish(info);
     }
 
 private:
@@ -64,7 +66,7 @@ private:
                         desc.var = var;
                         desc.x = x;
                         desc.y = y;
-                        descriptors.push_back(desc);
+                        descriptors.push(desc);
                         return true;
                     }
                 }

@@ -1,22 +1,22 @@
 #include "bitmap.hpp"
 
-#include <vector>
+#include "vector.hpp"
 
 class Shape
 {
-    std::vector<Bitmap> variants;
+    FastVector<Bitmap> variants;
 
 public:
     Shape(Bitmap bitmap) {
         for (size_t i = 0; i < 4; i++) {
             if(!isContained(bitmap))
-                variants.push_back(bitmap);
+                variants.push(bitmap);
             if(!isContained(bitmap.flipX()))
-                variants.push_back(bitmap.flipX());
+                variants.push(bitmap.flipX());
             if(!isContained(bitmap.flipY()))
-                variants.push_back(bitmap.flipY());
+                variants.push(bitmap.flipY());
             if(!isContained(bitmap.flipY().flipX()))
-                variants.push_back(bitmap.flipY().flipX());
+                variants.push(bitmap.flipY().flipX());
             bitmap = bitmap.rotate();
         }
     }
@@ -47,6 +47,10 @@ class ShapeMap : public Bitmap {
 public:
     ShapeMap(int width, int height, char color = 'X', const char* data = nullptr)
         : Bitmap(width, height, color, data)
+    {}
+
+    ShapeMap(const ShapeMap& other)
+        : Bitmap(other.width, other.height, other.color, other.buffer)
     {}
 
     bool willDrawOver(const Bitmap& other, int x0, int y0) {
