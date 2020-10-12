@@ -20,9 +20,6 @@ struct ProgressNotifier {
 class Solver : public ShapeSet
 {
     enum fit_result_t {FIT, FAIL, SOLUTION, CONTINUE};
-    struct frame_limit_t {
-        int minX, minY, maxX, maxY;
-    };
 
 
     ShapeMap& canvas;
@@ -85,8 +82,12 @@ private:
 
         if (refit)
             desc = undrawLast();
-        else
-            desc = {.var = 0, .x = frameLimit.minX, .y = frameLimit.minY};
+        else {
+            desc.var = 0;
+            desc.x = frameLimit.minX;
+            desc.y = frameLimit.minY;
+            static_cast<frame_limit_t&>(desc) = frameLimit;
+        }
 
         do {
             info.attempts++;
@@ -107,7 +108,6 @@ private:
             return FAIL;
         else {
             updateFrameLimit();
-            frameLimits.push_back(frameLimit);
             return ((descriptors.size() == shapes.size()) ? SOLUTION : FIT);
         }
     }
@@ -141,8 +141,7 @@ private:
         flooder.undraw(b, desc.x, desc.y);
 
         if (pop_frame) {
-            frameLimit = frameLimits[frameLimits.size()-1];
-            frameLimits.pop_back();
+            frameLimit = (frame_limit_t)desc;
         }
 
         return desc;
