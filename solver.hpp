@@ -27,7 +27,7 @@ class Solver : public ShapeSet
     solving_info_t info;
     FloodFiller flooder;
     frame_limit_t frameLimit;
-    std::vector<frame_limit_t> frameLimits;
+    FastVector<frame_limit_t> frameLimits;
 
 public:
     Solver(shapes_t& shapes, ShapeMap& canvas, ProgressNotifier& notifier)
@@ -64,7 +64,7 @@ private:
                         desc.var = var;
                         desc.x = x;
                         desc.y = y;
-                        descriptors.push_back(desc);
+                        descriptors.push(desc);
                         return true;
                     }
                 }

@@ -10,8 +10,8 @@ struct shape_desc_t : public frame_limit_t {
     int y;
 };
 
-typedef const std::vector<Shape> shapes_t;
-typedef std::vector<shape_desc_t> descriptors_t;
+typedef ConstFastVector<Shape> shapes_t;
+typedef FastVector<shape_desc_t> descriptors_t;
 
 struct ShapeSet {
     shapes_t& shapes;
@@ -53,11 +53,10 @@ public:
     }
 
     shape_desc_t undrawLast(ShapeMap& canvas) {
-        shape_desc_t desc = descriptors.back();
-        size_t i = (descriptors.size() - 1);
+        shape_desc_t desc;
 
-        canvas.undraw(shapes[i].getVariant(desc.var), desc.x, desc.y);
-        descriptors.pop_back();
+        descriptors.pop(&desc); // descriptors.size() now returns shape correlating to popped desc
+        canvas.undraw(shapes[descriptors.size()].getVariant(desc.var), desc.x, desc.y);
         return desc;
     }
 };

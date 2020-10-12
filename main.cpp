@@ -3,7 +3,8 @@
 
 #include "solver.hpp"
 
-const std::vector<Shape> shapes{
+constexpr size_t SHAPE_NUM = 12;
+const Shape shapes_arr[SHAPE_NUM]{
     (Bitmap) {5, 1, 'A', (const char[]) {1, 1, 1, 1, 1}},
     (Bitmap) {4, 2, 'B', (const char[]) {0, 1, 1, 1, 1, 1, 0, 0,}},
     (Bitmap) {4, 2, 'C', (const char[]) {1, 1, 1, 1, 1, 0, 0, 0,}},
@@ -17,6 +18,7 @@ const std::vector<Shape> shapes{
     (Bitmap) {3, 2, 'K', (const char[]) {1, 0, 1, 1, 1, 1}},
     (Bitmap) {3, 2, 'L', (const char[]) {1, 1, 1, 1, 1, 0}},
 };
+ConstFastVector<Shape> shapes(shapes_arr, SHAPE_NUM);
 
 
 #define COLOR_AFTER "\033[0m"
